@@ -65,3 +65,28 @@
         console.log(formData);
         return formData;
     };
+
+    var toJavaScriptDate = function (value, format) {
+        var patron = /Date\(([^]+)\)/;
+        var resultados = patron.exec(value);
+        var fecha = new Date(parseFloat(resultados[1]));
+        var day = fecha.getDate().toString();
+        var month = (fecha.getMonth() + 1).toString();
+        var year = fecha.getFullYear();
+        if (day.length == 1) {
+            day = "0" + day;
+        }
+        if (month.length == 1) {
+            month = "0" + month;
+        }
+        switch (format) {
+            case 'dd-mm-yyyy':
+                return (day + "/" + month + "/" + year);
+                break;
+            case 'yyyy-mm-dd':
+                return (year + "/" + month + "/" +  day);
+                break;
+            default:
+                return (day + "/" + month + "/" + year);
+        }
+    };
