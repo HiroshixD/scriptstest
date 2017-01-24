@@ -1,24 +1,67 @@
 'use strict';
-    var getData = function (jsonfields) {
-        var url = "/" + jsonfields.controller + "/" + jsonfields.method;
-        $.ajax({
-            type: jsonfields.type,
+    var GET = function (config, handleData) {
+        switch (true) {
+            case config.identifier > 0:
+                var url = "/" + config.controller + "/" + config.method + "/" + config.identifier;
+                break;
+            case config.identifier === false:
+                var url = "/" + config.controller + "/" + config.method;
+                break;
+        }
+        if (config.identifier === undefined) {
+            config.identifier = 1;
+        }
+        var data = $.ajax({
+            type: "GET",
             url: url,
             success: function (data) {
-                var tr;
-                for (var i = 0; i < data.length; i++) {
-                    tr = $('<tr/>');
-                    for (var j = 0; j < jsonfields.fields.length; j++) {
-                        console.log(data[i][jsonfields.fields[j]]);
-                        tr.append("<td>" + data[i][jsonfields.fields[j]] + "</td>");
-                    }
-
-                    tr.append("<td><a href=/Usuario/Edit/" + data[i].Id + ">Editar </a> | <a href=/Usuario/Details/" + data[i].Id + ">Detalles </a> | <a href=/Usuario/Delete/" + data[i].Id + ">Eliminar</a></td>");
-                    $('#data').append(tr);
-                }
+                handleData('success', data);
             },
             error: function (request, status, error, xhr) {
-                alert('error');
+                handleData('error', request.statusText);
             }
         });
-    }
+    };
+
+        var POST = function (config, handleData) {
+            $.ajax({
+                type: "POST",
+                url: "/" + config.controller + "/" + config.method,
+                data: config.data,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    handleData('success', data);
+                },
+                error: function (request, status, error, xhr) {
+                    alert('error');
+                    handleData('error', request.responseText);
+                }
+
+            });
+        };
+
+    var errorMessages = function (data) {
+      switch (data) {
+          case "OK":
+              alert("No hay Datos");
+              break;
+          case "Not Found":
+              alert("El metodo que ingresaste es incorrecto");
+              break;
+          default:
+              alert(data);
+              break;
+      }
+    };
+
+
+    var fillArray = function (data) {           
+        var formData = new FormData();
+        formData.append('__RequestVerificationToken', $('input[name="__RequestVerificationToken"]').val());
+        for (var i = 0; i < data.length; i++) {
+            formData.append(data[i], $('#' + data[i]).val());
+        }
+        console.log(formData);
+        return formData;
+    };
